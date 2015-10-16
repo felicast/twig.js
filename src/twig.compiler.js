@@ -24,7 +24,7 @@ var Twig = (function (Twig) {
             if (Twig.compiler.module[options.module] === undefined) {
                 throw new Twig.Error("Unable to find module type " + options.module);
             }
-            output = Twig.compiler.module[options.module](id, tokens, options.twig);
+            output = Twig.compiler.module[options.module](id, tokens, options.twig, options.compilerOptions);
         } else {
             output = Twig.compiler.wrap(id, tokens);
         }
@@ -34,12 +34,22 @@ var Twig = (function (Twig) {
     Twig.compiler.module = {
         amd: function(id, tokens, pathToTwig) {
             return 'define(["' + pathToTwig + '"], function (Twig) {\n\tvar twig, templates;\ntwig = Twig.twig;\ntemplates = ' + Twig.compiler.wrap(id, tokens) + '\n\treturn templates;\n});';
-        }
-        , node: function(id, tokens) {
+        },
+        amdSmart: function(id, tokens, pathToTwig, options) {
+            var required = [];
+            required.push('"' + pathToTwig + '"');
+            if (options.required) {
+                options.required.forEach(function (req) {
+                    required.push('"' + req + '"');
+                });
+            }
+            return 'define([' + required.join(', ') + '], function (Twig) {\n\tvar twig, templates;\ntwig = Twig.twig;\ntemplates = ' + Twig.compiler.wrap(id, tokens) + '\n\treturn function () { return templates.render.apply(templates, arguments); };\n});';
+        },
+        node: function(id, tokens) {
             return 'var twig = require("twig").twig;\n'
                 + 'exports.template = ' + Twig.compiler.wrap(id, tokens)
-        }
-        , cjs2: function(id, tokens, pathToTwig) {
+        },
+        cjs2: function(id, tokens, pathToTwig) {
             return 'module.declare([{ twig: "' + pathToTwig + '" }], function (require, exports, module) {\n'
                         + '\tvar twig = require("twig").twig;\n'
                         + '\texports.template = ' + Twig.compiler.wrap(id, tokens)
