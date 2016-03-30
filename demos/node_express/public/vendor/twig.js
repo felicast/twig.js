@@ -5550,7 +5550,6 @@ var Twig = (function (Twig) {
                     required.push('"' + req + '"');
                 });
             }
-            console.log(options.runtimeOptions);
             return 'define([' + required.join(', ') + '], function (Twig) {\n\tvar twig, templates;\ntwig = Twig.twig;\ntemplates = ' + Twig.compiler.wrap(id, tokens, options.runtimeOptions) + '\n\treturn function () { return templates.render.apply(templates, arguments); };\n});';
         },
         node: function(id, tokens) {
@@ -5574,7 +5573,6 @@ var Twig = (function (Twig) {
         if (options) {
             Twig.merge(runOptions, options);
         }
-            console.log(runOptions);
         //return 'twig({id:"'+id.replace('"', '\\"')+'", data:'+tokens+', precompiled: true});\n';
         return 'twig(' + JSON.stringify(runOptions) + ');\n';
     };
