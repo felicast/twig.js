@@ -43,7 +43,8 @@ var Twig = (function (Twig) {
                     required.push('"' + req + '"');
                 });
             }
-            return 'define([' + required.join(', ') + '], function (Twig) {\n\tvar twig, templates;\ntwig = Twig.twig;\ntemplates = ' + Twig.compiler.wrap(id, tokens) + '\n\treturn function () { return templates.render.apply(templates, arguments); };\n});';
+            console.log(options.runtimeOptions);
+            return 'define([' + required.join(', ') + '], function (Twig) {\n\tvar twig, templates;\ntwig = Twig.twig;\ntemplates = ' + Twig.compiler.wrap(id, tokens, options.runtimeOptions) + '\n\treturn function () { return templates.render.apply(templates, arguments); };\n});';
         },
         node: function(id, tokens) {
             return 'var twig = require("twig").twig;\n'
@@ -57,8 +58,18 @@ var Twig = (function (Twig) {
         }
     };
 
-    Twig.compiler.wrap = function(id, tokens) {
-        return 'twig({id:"'+id.replace('"', '\\"')+'", data:'+tokens+', precompiled: true});\n';
+    Twig.compiler.wrap = function(id, tokens, options) {
+        var runOptions = {
+            id: id,
+            data: JSON.parse(tokens),
+            precompiled: true
+        };
+        if (options) {
+            Twig.merge(runOptions, options);
+        }
+            console.log(runOptions);
+        //return 'twig({id:"'+id.replace('"', '\\"')+'", data:'+tokens+', precompiled: true});\n';
+        return 'twig(' + JSON.stringify(runOptions) + ');\n';
     };
 
     return Twig;
